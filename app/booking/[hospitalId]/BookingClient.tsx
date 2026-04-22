@@ -29,11 +29,18 @@ export default function BookingClient({
   const { currency } = useCurrency()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [patientName, setPatientName] = useState('Demo Patient')
+  const [patientEmail, setPatientEmail] = useState('')
 
   const handleConfirm = async () => {
     setSubmitting(true)
     setError(null)
     try {
+      await fetch('/api/patients/e1111111-1111-1111-1111-111111111111', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: patientName, email: patientEmail }),
+      })
       const res = await fetch('/api/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -88,6 +95,29 @@ export default function BookingClient({
                 {convertPrice(Number(price), currency)}
               </span>
             </div>
+          </div>
+        </div>
+
+        {/* Your Details */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-4">
+          <h3 className="font-semibold text-gray-800">Your Details</h3>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-600">Full Name</label>
+            <input
+              type="text"
+              value={patientName}
+              onChange={e => setPatientName(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-[11px] text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-medium text-gray-600">Email</label>
+            <input
+              type="email"
+              value={patientEmail}
+              onChange={e => setPatientEmail(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-[11px] text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
           </div>
         </div>
 
