@@ -1,280 +1,322 @@
-# Rogveda — Medical Travel Booking Platform
+# 🏥 Rogveda — Medical Travel Booking Platform
 
-> A full-stack mini booking platform for international patients seeking medical procedures in India. Built in under 12 hours as a trial task — patients search hospitals, compare pricing, and book procedures. Vendors receive bookings in real time and manage tasks through a protected dashboard.
+> A production-grade mini booking platform for international patients seeking medical procedures in India.
+> Patients search hospitals, compare pricing across currencies, and book procedures with BNPL.
+> Vendors receive bookings in real time and manage tasks through a protected dashboard.
+> **Built end-to-end in under 12 hours.**
 
----
-
-## 🌐 Live URL
-
-**https://rogveda-tau.vercel.app**
-
-## 📦 Repository
-
-**https://github.com/jarpit2003/Rogveda**
-
-## 🏥 Vendor Dashboard
-
-**https://rogveda-tau.vercel.app/vendor/login**
-```
-Username: apollo
-Password: apollo123
-```
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-rogveda--tau.vercel.app-blue?style=for-the-badge)](https://rogveda-tau.vercel.app)
+[![GitHub](https://img.shields.io/badge/GitHub-jarpit2003%2FRogveda-black?style=for-the-badge&logo=github)](https://github.com/jarpit2003/Rogveda)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://rogveda-tau.vercel.app)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
+[![Supabase](https://img.shields.io/badge/Database-Supabase-green?style=for-the-badge&logo=supabase)](https://supabase.com)
 
 ---
 
-## System Architecture
+## 🔗 Quick Links
+
+| | Link |
+|---|---|
+| 🌐 Patient App | https://rogveda-tau.vercel.app |
+| 🏥 Vendor Dashboard | https://rogveda-tau.vercel.app/vendor/login |
+| 📦 Repository | https://github.com/jarpit2003/Rogveda |
+
+**Vendor credentials:** `apollo` / `apollo123`
+
+---
+
+## 🧠 What Makes This Different
+
+This isn't three separate pages stitched together. It's one connected system:
+
+- A patient books on the frontend → a real record is written to PostgreSQL → the vendor sees it instantly on their dashboard → the vendor marks a task complete → the booking status updates back in the database.
+- Every piece of data comes from the API. Zero hardcoded frontend data.
+- The vendor dashboard is protected at the **middleware layer** — not just a client-side redirect.
+- The Supabase service role key is guarded with a `server-only` import — it physically cannot be bundled into the client.
+
+---
+
+## 🏗️ System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        CLIENT (Browser)                         │
-│                                                                 │
-│   ┌─────────────┐   ┌──────────────────┐   ┌───────────────┐  │
-│   │  Search Page │   │  Booking Flow    │   │ Vendor Dash   │  │
-│   │  (SSR + CSR) │   │  (Client)        │   │ (Protected)   │  │
-│   └──────┬──────┘   └────────┬─────────┘   └───────┬───────┘  │
-│          │                   │                       │          │
-└──────────┼───────────────────┼───────────────────────┼──────────┘
-           │                   │                       │
-           ▼                   ▼                       ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   Next.js 14 App Router (Vercel Edge)           │
-│                                                                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌───────────────────────┐ │
-│  │ GET           │  │ POST         │  │ Middleware             │ │
-│  │ /api/hospitals│  │ /api/bookings│  │ Cookie auth guard     │ │
-│  └──────────────┘  └──────────────┘  │ /vendor/dashboard     │ │
-│  ┌──────────────┐  ┌──────────────┐  └───────────────────────┘ │
-│  │ POST          │  │ GET          │                            │
-│  │/vendor/login  │  │/vendor/      │                            │
-│  └──────────────┘  │ bookings     │                            │
-│  ┌──────────────┐  └──────────────┘                            │
-│  │ PATCH         │                                              │
-│  │/vendor/tasks/ │                                              │
-│  │ [id]          │                                              │
-│  └──────────────┘                                              │
-└─────────────────────────────────────────────────────────────────┘
-           │
-           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    Supabase (PostgreSQL)                         │
-│                                                                 │
-│  hospitals ──< doctors ──< pricing                              │
-│  patients  ──< bookings ──< vendor_tasks                        │
-│  patients  ──< wallet_transactions                              │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│                          CLIENT (Browser)                            │
+│                                                                      │
+│  ┌──────────────────┐  ┌───────────────────┐  ┌──────────────────┐  │
+│  │   Search Page    │  │   Booking Flow    │  │  Vendor Dashboard│  │
+│  │  SSR + CSR       │  │  Client-side      │  │  Cookie-protected│  │
+│  │  /               │  │  /booking/[id]    │  │  /vendor/dash    │  │
+│  └────────┬─────────┘  └────────┬──────────┘  └────────┬─────────┘  │
+└───────────┼─────────────────────┼─────────────────────┼─────────────┘
+            │                     │                      │
+            ▼                     ▼                      ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│              Next.js 14 App Router — Vercel Edge Network             │
+│                                                                      │
+│  ┌─────────────────┐   ┌─────────────────┐   ┌────────────────────┐ │
+│  │ GET             │   │ POST            │   │ middleware.ts      │ │
+│  │ /api/hospitals  │   │ /api/bookings   │   │                    │ │
+│  │                 │   │                 │   │ Intercepts:        │ │
+│  │ → joins doctors │   │ → 4 sequential  │   │ /vendor/dashboard  │ │
+│  │   + pricing     │   │   DB writes     │   │                    │ │
+│  └─────────────────┘   └─────────────────┘   │ Reads cookie →     │ │
+│                                               │ redirect if invalid│ │
+│  ┌─────────────────┐   ┌─────────────────┐   └────────────────────┘ │
+│  │ POST            │   │ GET             │                           │
+│  │ /vendor/login   │   │ /vendor/bookings│                           │
+│  │                 │   │                 │                           │
+│  │ → sets HTTP-only│   │ → joined query  │                           │
+│  │   cookie (24h)  │   │   across 4 tbls │                           │
+│  └─────────────────┘   └─────────────────┘                           │
+│                                                                      │
+│  ┌─────────────────┐                                                 │
+│  │ PATCH           │                                                 │
+│  │ /vendor/tasks/  │                                                 │
+│  │ [id]            │                                                 │
+│  │                 │                                                 │
+│  │ → marks task    │                                                 │
+│  │   complete +    │                                                 │
+│  │   updates status│                                                 │
+│  └─────────────────┘                                                 │
+└──────────────────────────────────────────────────────────────────────┘
+            │
+            ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│                      Supabase — PostgreSQL                           │
+│                                                                      │
+│   hospitals ──────< doctors ──────< pricing                          │
+│       │                                                              │
+│       └──────────────────────────────────────────────┐              │
+│                                                       │              │
+│   patients ───────< bookings ─────< vendor_tasks      │              │
+│       │                 │                             │              │
+│       └──< wallet_transactions                        │              │
+│                         │                             │              │
+│                    hospital_id ───────────────────────┘              │
+│                                                                      │
+│   RLS enabled on all tables (auto-trigger on CREATE TABLE)           │
+└──────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Database Schema
+## 🗄️ Database Schema
 
 ```
-hospitals
-├── id (uuid, PK)
-├── name
-├── location
-├── procedure
-├── image_url
-├── accreditation
-└── created_at
+hospitals                          doctors
+─────────────────────────          ─────────────────────────
+id           uuid  PK              id             uuid  PK
+name         text                  hospital_id    uuid  FK → hospitals
+location     text                  name           text
+procedure    text                  experience_yrs int
+image_url    text  nullable        created_at     timestamptz
+accreditation text
+created_at   timestamptz
 
-doctors
-├── id (uuid, PK)
-├── hospital_id (FK → hospitals)
-├── name
-├── experience_years
-└── created_at
+pricing                            patients
+─────────────────────────          ─────────────────────────
+id           uuid  PK              id             uuid  PK
+hospital_id  uuid  FK → hospitals  name           text
+doctor_id    uuid  FK → doctors    email          text  nullable
+room_type    text                  wallet_balance numeric  ← goes negative (BNPL)
+price_usd    numeric               created_at     timestamptz
+created_at   timestamptz
 
-pricing
-├── id (uuid, PK)
-├── hospital_id (FK → hospitals)
-├── doctor_id (FK → doctors)
-├── room_type
-├── price_usd
-└── created_at
-
-patients
-├── id (uuid, PK)
-├── name
-├── email
-├── wallet_balance   ← can go negative (BNPL)
-└── created_at
-
-bookings
-├── id (uuid, PK)
-├── patient_id (FK → patients)
-├── hospital_id (FK → hospitals)
-├── doctor_id (FK → doctors)
-├── room_type
-├── price_usd
-├── status           ← "Confirmed" | "In Progress"
-└── created_at
-
-vendor_tasks
-├── id (uuid, PK)
-├── booking_id (FK → bookings)
-├── task_name        ← "Visa Invite Letter"
-├── is_complete
-├── completed_at
-└── created_at
+bookings                           vendor_tasks
+─────────────────────────          ─────────────────────────
+id           uuid  PK              id             uuid  PK
+patient_id   uuid  FK → patients   booking_id     uuid  FK → bookings
+hospital_id  uuid  FK → hospitals  task_name      text  default "Visa Invite Letter"
+doctor_id    uuid  FK → doctors    is_complete    bool  default false
+room_type    text                  completed_at   timestamptz nullable
+price_usd    numeric               created_at     timestamptz
+status       text  ← "Confirmed" | "In Progress"
+created_at   timestamptz
 
 wallet_transactions
-├── id (uuid, PK)
-├── patient_id (FK → patients)
-├── booking_id (FK → bookings)
-├── amount           ← negative on booking charge
-├── type             ← "booking_charge"
-└── created_at
+─────────────────────────
+id           uuid  PK
+patient_id   uuid  FK → patients
+booking_id   uuid  FK → bookings
+amount       numeric  ← always negative (debit)
+type         text     ← "booking_charge"
+created_at   timestamptz
 ```
 
 ---
 
-## Booking Flow
+## 🔄 Booking Flow — End to End
 
 ```
-Patient clicks "Book Now"
-        │
-        ▼
-/booking/[hospitalId]?doctorId=&roomType=&price=...
-        │
-        ▼
-Patient clicks "Confirm Booking"
-        │
-        ▼
-POST /api/bookings
-        │
-        ├── 1. INSERT into bookings (status: "Confirmed")
-        ├── 2. INSERT into wallet_transactions (amount: -price_usd)
-        ├── 3. UPDATE patients SET wallet_balance = balance - price_usd
-        └── 4. INSERT into vendor_tasks (task: "Visa Invite Letter")
-        │
-        ▼
-Redirect → /confirmation?bookingId=&balance=...
-        │
-        ▼
-Vendor sees booking on dashboard (on refresh)
-        │
-        ▼
-Vendor marks "Visa Invite Letter" complete
-        │
-        ▼
-PATCH /api/vendor/tasks/[id]
-        │
-        ├── UPDATE vendor_tasks SET is_complete = true
-        └── UPDATE bookings SET status = "In Progress"
+[Patient]                    [Next.js API]               [Supabase]
+    │                              │                          │
+    │  clicks "Book Now"           │                          │
+    │ ─────────────────────────►  │                          │
+    │                              │                          │
+    │  /booking/[hospitalId]       │                          │
+    │  ?doctorId=&roomType=&price= │                          │
+    │                              │                          │
+    │  clicks "Confirm Booking"    │                          │
+    │ ─────────────────────────►  │                          │
+    │                              │                          │
+    │         POST /api/bookings   │                          │
+    │ ─────────────────────────►  │                          │
+    │                              │  INSERT bookings         │
+    │                              │ ────────────────────►   │
+    │                              │  ← booking.id           │
+    │                              │                          │
+    │                              │  INSERT wallet_txn       │
+    │                              │ ────────────────────►   │
+    │                              │                          │
+    │                              │  UPDATE patient wallet   │
+    │                              │ ────────────────────►   │
+    │                              │  ← new_balance          │
+    │                              │                          │
+    │                              │  INSERT vendor_task      │
+    │                              │ ────────────────────►   │
+    │                              │                          │
+    │  { booking_id, balance }     │                          │
+    │ ◄─────────────────────────  │                          │
+    │                              │                          │
+    │  redirect /confirmation      │                          │
+    │                              │                          │
+
+[Vendor]                     [Next.js API]               [Supabase]
+    │                              │                          │
+    │  GET /vendor/dashboard       │                          │
+    │ ─────────────────────────►  │                          │
+    │  (middleware checks cookie)  │                          │
+    │                              │  SELECT bookings         │
+    │                              │  JOIN patients           │
+    │                              │  JOIN hospitals          │
+    │                              │  JOIN doctors            │
+    │                              │  LEFT JOIN vendor_tasks  │
+    │                              │ ────────────────────►   │
+    │  sees new booking            │                          │
+    │ ◄─────────────────────────  │                          │
+    │                              │                          │
+    │  marks task complete         │                          │
+    │ ─────────────────────────►  │                          │
+    │         PATCH /vendor/tasks/[id]                        │
+    │                              │  UPDATE vendor_tasks     │
+    │                              │  UPDATE bookings status  │
+    │                              │ ────────────────────►   │
+    │  status → "In Progress"      │                          │
+    │ ◄─────────────────────────  │                          │
 ```
 
 ---
 
-## Auth Flow (Vendor)
+## 🔐 Auth & Security Design
 
 ```
+Vendor Login Flow
+─────────────────
 POST /api/vendor/login
-  └── Compare username/password against env vars
-  └── Set HTTP-only cookie: vendor_session=valid (24h)
+  ├── Reads VENDOR_USERNAME + VENDOR_PASSWORD from env (never exposed to client)
+  ├── On match: sets HTTP-only cookie vendor_session=valid, maxAge=86400
+  └── On fail: 401 Unauthorized
 
-middleware.ts
-  └── Intercepts /vendor/dashboard/*
-  └── Reads vendor_session cookie
-  └── Redirects to /vendor/login if missing/invalid
+Route Protection (middleware.ts — runs at Edge)
+────────────────────────────────────────────────
+Every request to /vendor/dashboard/* is intercepted
+  ├── Reads vendor_session cookie
+  ├── If missing or invalid → redirect to /vendor/login
+  └── If valid → allow through
 
-GET /api/vendor/bookings
-  └── Reads cookie from request headers
-  └── Returns 401 if not valid
+API Protection
+──────────────
+GET /api/vendor/bookings   → checks cookie server-side, returns 401 if invalid
+PATCH /api/vendor/tasks/*  → checks cookie server-side, returns 401 if invalid
+
+Key Security Decisions
+───────────────────────
+✓ SUPABASE_SERVICE_ROLE_KEY guarded with `import 'server-only'`
+  → physically cannot be bundled into client JS
+✓ Vendor credentials stored in env vars, never in code
+✓ HTTP-only cookie → not accessible via document.cookie (XSS safe)
+✓ RLS enabled on all Supabase tables via event trigger
 ```
 
 ---
 
-## Project Structure
+## 💡 Key Design Decisions
+
+| Decision | Why |
+|---|---|
+| SSR for home page, CSR for booking | Home page benefits from server-side fetch for SEO + speed. Booking is interactive, needs client state. |
+| `server-only` on `lib/supabase.ts` | Prevents the service role key from ever reaching the browser bundle, even accidentally. |
+| Sequential DB writes (not a transaction) | Supabase JS client doesn't support multi-statement transactions. Sequential writes with error handling is the pragmatic choice. |
+| URL search params for booking state | Avoids global state management complexity. Booking details passed cleanly via URL, readable and shareable. |
+| Middleware for vendor auth | Edge middleware runs before the page renders — no flash of protected content, no client-side redirect flicker. |
+| BNPL via negative wallet balance | Simplest correct implementation — no credit system needed, wallet just goes negative and is shown to the patient. |
+
+---
+
+## 📁 Project Structure
 
 ```
 rogveda/
 ├── app/
 │   ├── _components/
-│   │   └── SearchClient.tsx       # Client wrapper for search page
+│   │   └── SearchClient.tsx        # 'use client' wrapper — receives SSR data
 │   ├── api/
-│   │   ├── hospitals/route.ts     # GET hospitals with doctors + pricing
-│   │   ├── bookings/route.ts      # POST create booking
+│   │   ├── hospitals/route.ts      # GET — hospitals + doctors + pricing (parallel fetch)
+│   │   ├── bookings/route.ts       # POST — 4-step booking creation
 │   │   └── vendor/
-│   │       ├── login/route.ts     # POST vendor login
-│   │       ├── bookings/route.ts  # GET all bookings (auth)
-│   │       └── tasks/[id]/route.ts # PATCH mark task complete
+│   │       ├── login/route.ts      # POST — credential check + cookie set
+│   │       ├── bookings/route.ts   # GET — joined query across 4 tables (auth)
+│   │       └── tasks/[id]/route.ts # PATCH — mark complete + update status (auth)
 │   ├── booking/[hospitalId]/
-│   │   └── page.tsx               # Booking confirmation screen
+│   │   └── page.tsx                # Booking confirmation screen (client)
 │   ├── confirmation/
-│   │   └── page.tsx               # Post-booking success screen
+│   │   └── page.tsx                # Post-booking success screen
 │   ├── vendor/
-│   │   ├── login/page.tsx         # Vendor login
-│   │   └── dashboard/page.tsx     # Vendor bookings dashboard
-│   ├── layout.tsx                 # Root layout + CurrencyProvider
-│   └── page.tsx                   # Home (SSR fetch → SearchClient)
+│   │   ├── login/page.tsx          # Vendor login form
+│   │   └── dashboard/page.tsx      # Bookings list + task management
+│   ├── layout.tsx                  # Root layout — wraps with CurrencyProvider
+│   └── page.tsx                    # Home — SSR fetch → passes to SearchClient
 ├── components/
-│   ├── HospitalCard.tsx           # Card with doctor/room dropdowns
-│   ├── CurrencyToggle.tsx         # USD / INR / NGN switcher
-│   └── TrustSignals.tsx           # Trust strip (JCI, BNPL, Visa, 24/7)
+│   ├── HospitalCard.tsx            # Doctor/room dropdowns, dynamic price, Book Now
+│   ├── CurrencyToggle.tsx          # USD / INR / NGN switcher (reads context)
+│   └── TrustSignals.tsx            # JCI, BNPL, Visa, 24/7 trust strip
 ├── context/
-│   └── CurrencyContext.tsx        # Global currency state
+│   └── CurrencyContext.tsx         # Global currency state (React context)
 ├── lib/
-│   ├── supabase.ts                # Supabase client + admin (server-only)
-│   ├── currency.ts                # Conversion rates + formatters
-│   └── types.ts                   # TypeScript interfaces
-└── middleware.ts                  # Vendor session guard
+│   ├── supabase.ts                 # Supabase clients — server-only guarded
+│   ├── currency.ts                 # Rates + convertPrice formatter
+│   └── types.ts                    # All TypeScript interfaces
+└── middleware.ts                   # Edge middleware — vendor session guard
 ```
 
 ---
 
-## What's Built
+## 🚀 Tech Stack
 
-### Part 1 — Patient Search & Booking
-- Search results page showing 3 hospitals for "Total Knee Replacement in Delhi"
-- Doctor dropdown + room type dropdown with instant dynamic pricing
-- Currency toggle: USD / INR / NGN (1 USD = 83 INR = 1,550 NGN)
-- Lowest price highlighted by default per doctor
-- BNPL — wallet starts at $0, goes negative on booking
-- Confirmation screen with booking ID and updated wallet balance
-- Trust signals: JCI/NABH accreditation, free visa assistance, 24/7 coordinator, BNPL
-- Loading states, error handling, empty states throughout
-
-### Part 2 — Vendor Dashboard
-- Separate login at `/vendor/login` (apollo / apollo123)
-- Protected by HTTP-only cookie via Next.js middleware
-- Lists all bookings: patient, hospital, doctor, room, price, status
-- Vendor marks "Visa Invite Letter" complete → status updates to "In Progress"
-
-### Part 3 — Backend & Database
-- Next.js 14 App Router API routes (no separate server)
-- Supabase PostgreSQL — 7 tables, all relational with foreign keys
-- All frontend data comes from API — zero hardcoded data
-- Input validation and error handling on every endpoint
-- `server-only` guard on Supabase admin client to prevent key leakage
+| Layer | Technology | Why |
+|---|---|---|
+| Framework | Next.js 14 (App Router) | SSR + API routes in one — no separate backend needed |
+| Language | TypeScript | Type safety across API ↔ frontend boundary |
+| Styling | Tailwind CSS | Fast, consistent, mobile-first |
+| Database | Supabase (PostgreSQL) | Relational data, real-time capable, free tier |
+| Auth | HTTP-only cookie | Simple, secure, no JWT complexity needed |
+| Deployment | Vercel | Zero-config Next.js deployment |
+| Icons | lucide-react | Clean, consistent icon set |
 
 ---
 
-## Tech Stack
+## 🤖 AI Tool Used
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 14 (App Router) |
-| Language | TypeScript |
-| Styling | Tailwind CSS |
-| Database | Supabase (PostgreSQL) |
-| Auth | HTTP-only cookie session |
-| Deployment | Vercel |
-| Icons | lucide-react |
+**Amazon Q Developer** (AWS IDE plugin) — used for scaffolding every file, API route, component, and the database schema. Each file was prompted individually with precise specs.
+
+**What I manually fixed:**
+- UUID seed data had a `p` prefix (`p1111111-...`) — invalid hex, PostgreSQL rejected it. Fixed to `e1111111-...`
+- Added `import 'server-only'` to `lib/supabase.ts` after diagnosing a client-side bundle error (`supabaseKey is required`)
+- Supabase joined query returns nested objects (`patients.name`) — manually mapped to flat shape expected by the vendor dashboard
 
 ---
 
-## AI Tool Used
-
-**Amazon Q Developer** (AWS IDE plugin) — used for scaffolding all files, API routes, components, and database schema. Every file was prompted individually to spec. Manual fixes were made for:
-- UUID seed data format (`p` prefix is invalid hex)
-- `server-only` import to prevent Supabase admin keys from bundling into the client
-- Supabase joined query shape mapping for vendor bookings
-
----
-
-## Local Setup
+## ⚙️ Local Setup
 
 ```bash
 git clone https://github.com/jarpit2003/Rogveda.git
@@ -297,18 +339,29 @@ VENDOR_SESSION_SECRET=rogveda_secret_session_2024
 
 ```bash
 npm run dev
+# → http://localhost:3000
 ```
-
-Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## API Endpoints
+## 📡 API Reference
 
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| GET | `/api/hospitals` | None | Fetch all hospitals with doctors and pricing |
-| POST | `/api/bookings` | None | Create booking, deduct wallet, create vendor task |
-| POST | `/api/vendor/login` | None | Vendor login — sets HTTP-only session cookie |
-| GET | `/api/vendor/bookings` | Cookie | Fetch all bookings for vendor dashboard |
-| PATCH | `/api/vendor/tasks/[id]` | Cookie | Mark task complete, update booking status |
+| Method | Endpoint | Auth | Request Body | Response |
+|---|---|---|---|---|
+| `GET` | `/api/hospitals` | — | — | `Hospital[]` with doctors + pricing |
+| `POST` | `/api/bookings` | — | `{ patient_id, hospital_id, doctor_id, room_type, price_usd }` | `{ booking_id, new_wallet_balance }` |
+| `POST` | `/api/vendor/login` | — | `{ username, password }` | `{ success: true }` + sets cookie |
+| `GET` | `/api/vendor/bookings` | Cookie | — | `VendorBooking[]` |
+| `PATCH` | `/api/vendor/tasks/[id]` | Cookie | `{ is_complete }` | `{ success: true, booking_status }` |
+
+---
+
+## 🗺️ App Routes
+
+| Route | Type | Description |
+|---|---|---|
+| `/` | SSR + Client | Hospital search + currency toggle |
+| `/booking/[hospitalId]` | Client | Booking confirmation + BNPL wallet |
+| `/confirmation` | Client | Post-booking success screen |
+| `/vendor/login` | Client | Vendor authentication |
+| `/vendor/dashboard` | Client (protected) | Bookings list + task management |
