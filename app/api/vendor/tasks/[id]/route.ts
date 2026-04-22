@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase'
-import { NextResponse, cookies } from 'next/server'
+import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
