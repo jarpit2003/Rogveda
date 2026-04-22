@@ -44,6 +44,10 @@ export default function VendorLoginPage() {
           value={username}
           onChange={e => setUsername(e.target.value)}
           className="w-full border border-gray-300 rounded-lg px-4 py-[11px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        <input
+          type="password"
           placeholder="Password"
           value={password}
           onChange={e => setPassword(e.target.value)}
