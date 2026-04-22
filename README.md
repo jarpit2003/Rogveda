@@ -316,6 +316,20 @@ rogveda/
 
 ---
 
+## 🧗 Hardest Part
+
+**Keeping the Supabase service role key off the client bundle.**
+
+The app uses two Supabase clients — an anon client (safe for the browser) and an admin client with the service role key (server-only). Both were exported from the same `lib/supabase.ts` file. Even though the admin client was only *called* from API routes, Next.js was still bundling the entire file into the client because a component somewhere in the tree imported from it indirectly.
+
+This caused a runtime crash: `supabaseKey is required` — the service role key is a server env var, so it's `undefined` in the browser.
+
+The fix was adding `import 'server-only'` at the top of `lib/supabase.ts`. This is a special Next.js package that throws a **build-time error** if the file is ever imported in a client context — making it physically impossible for the key to leak, even accidentally in the future.
+
+It's a small line of code but it required understanding how Next.js bundles server vs client modules, reading the error trace carefully, and knowing that `server-only` exists as a solution. That's the kind of thing you don't find by guessing — you find it by understanding the framework.
+
+---
+
 ## ⚙️ Local Setup
 
 ```bash
