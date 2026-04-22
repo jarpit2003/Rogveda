@@ -43,7 +43,7 @@ export default function VendorDashboardPage() {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/vendor/bookings')
+      const res = await fetch('/api/vendor/bookings', { credentials: 'include' })
       if (!res.ok) throw new Error('Failed to load bookings')
       setBookings(await res.json())
     } catch {
@@ -62,7 +62,7 @@ export default function VendorDashboardPage() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'bookings' },
         async () => {
-          const res = await fetch('/api/vendor/bookings')
+          const res = await fetch('/api/vendor/bookings', { credentials: 'include' })
           const data = await res.json()
           setBookings(data)
         }
@@ -80,6 +80,7 @@ export default function VendorDashboardPage() {
       const res = await fetch(`/api/vendor/tasks/${taskId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ is_complete: true }),
       })
       if (res.ok) {
