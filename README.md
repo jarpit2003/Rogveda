@@ -6,7 +6,7 @@ A mini medical travel booking platform built for the Rogveda trial task. Interna
 
 ## Live URL
 
-> _Add your Vercel deployment URL here_
+> https://rogveda-tau.vercel.app
 
 ## Repository
 
@@ -14,7 +14,7 @@ A mini medical travel booking platform built for the Rogveda trial task. Interna
 
 ## Vendor Dashboard
 
-> `[Live URL]/vendor/login`
+> https://rogveda-tau.vercel.app/vendor/login
 > Username: `apollo` | Password: `apollo123`
 
 ---
