@@ -44,6 +44,10 @@ export default function VendorDashboardPage() {
     setError('')
     try {
       const res = await fetch('/api/vendor/bookings', { credentials: 'include' })
+      if (res.status === 401) {
+        window.location.href = '/vendor/login'
+        return
+      }
       if (!res.ok) throw new Error('Failed to load bookings')
       setBookings(await res.json())
     } catch {
