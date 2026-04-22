@@ -1,7 +1,8 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { NextResponse, cookies } from 'next/server'
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const cookieStore = await cookies()
   const session = cookieStore.get('vendor_session')
 
@@ -14,7 +15,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     const { data: task, error: taskError } = await supabaseAdmin
       .from('vendor_tasks')
       .update({ is_complete: true, completed_at: new Date().toISOString() })
-      .eq('id', params.id)
+      .eq('id', id)
       .select('booking_id')
       .single()
 
