@@ -3,7 +3,7 @@
 import { Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { CheckCircle, Copy, Check } from 'lucide-react'
+import { CheckCircle, Copy, Check, MessageCircle } from 'lucide-react'
 import { useCurrency } from '@/context/CurrencyContext'
 import { convertPrice } from '@/lib/currency'
 
@@ -71,6 +71,28 @@ function ConfirmationContent() {
             Your coordinator will reach out to discuss payment options.
           </p>
         </div>
+
+        {/* WhatsApp */}
+        {(() => {
+          const waMessage = encodeURIComponent(
+            `Hi, I just booked Total Knee Replacement at ${hospitalName}. My Booking ID is RGV-${bookingId.slice(0, 8).toUpperCase()}. Please assist me with next steps.`
+          )
+          const waLink = `https://wa.me/911234567890?text=${waMessage}`
+          return (
+            <div className="flex flex-col items-center gap-1">
+              <a
+                href={waLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-lg transition min-h-[44px]"
+              >
+                <MessageCircle className="w-5 h-5" />
+                Chat with your coordinator on WhatsApp
+              </a>
+              <p className="text-xs text-gray-400">Average response time: under 2 hours</p>
+            </div>
+          )
+        })()}
 
         {/* Next Steps */}
         <div className="space-y-2">
