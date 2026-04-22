@@ -24,8 +24,7 @@ export default function VendorLoginPage() {
         const data = await res.json().catch(() => ({}))
         setError(data.error ?? 'Invalid credentials. Please try again.')
       } else {
-        router.refresh()
-        router.push('/vendor/dashboard')
+        window.location.href = '/vendor/dashboard'
       }
     } catch {
       setError('Something went wrong. Please try again.')
