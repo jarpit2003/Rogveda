@@ -7,6 +7,19 @@ import type { VendorBooking } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
+function StatusPill({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    'Confirmed': 'bg-yellow-100 text-yellow-800 border border-yellow-300',
+    'In Progress': 'bg-blue-100 text-blue-800 border border-blue-300',
+    'Completed': 'bg-green-100 text-green-800 border border-green-300',
+  }
+  return (
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-gray-100 text-gray-800'}`}>
+      {status}
+    </span>
+  )
+}
+
 export default function VendorDashboardPage() {
   const router = useRouter()
   const [bookings, setBookings] = useState<VendorBooking[]>([])
@@ -156,13 +169,7 @@ export default function VendorDashboardPage() {
                       ${b.price_usd.toLocaleString()}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        b.status === 'Confirmed'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-blue-100 text-blue-700'
-                      }`}>
-                        {b.status}
-                      </span>
+                      <StatusPill status={b.status} />
                     </td>
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{b.task_name}</td>
                     <td className="px-4 py-3 whitespace-nowrap">
