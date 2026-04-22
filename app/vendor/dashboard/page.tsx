@@ -63,6 +63,7 @@ export default function VendorDashboardPage() {
   useEffect(() => { fetchBookings() }, [])
 
   useEffect(() => {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return
     const channel = supabase
       .channel('bookings-changes')
       .on(
