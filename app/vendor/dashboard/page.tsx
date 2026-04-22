@@ -7,6 +7,18 @@ import type { VendorBooking } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
+function SkeletonRow() {
+  return (
+    <tr className="animate-pulse">
+      {[...Array(8)].map((_, i) => (
+        <td key={i} className="px-4 py-3">
+          <div className="h-4 bg-gray-200 rounded w-full" />
+        </td>
+      ))}
+    </tr>
+  )
+}
+
 function StatusPill({ status }: { status: string }) {
   const styles: Record<string, string> = {
     'Confirmed': 'bg-yellow-100 text-yellow-800 border border-yellow-300',
@@ -129,8 +141,19 @@ export default function VendorDashboardPage() {
 
         {/* Table area */}
         {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <div className="overflow-x-auto rounded-xl shadow-sm">
+            <table className="min-w-full bg-white text-sm">
+              <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
+                <tr>
+                  {['Patient', 'Procedure', 'Doctor', 'Room', 'Price', 'Status', 'Task', 'Action'].map(col => (
+                    <th key={col} className="px-4 py-3 text-left font-medium whitespace-nowrap">{col}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {[...Array(5)].map((_, i) => <SkeletonRow key={i} />)}
+              </tbody>
+            </table>
           </div>
         ) : error ? (
           <div className="text-center py-20 space-y-3">
