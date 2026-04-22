@@ -1,12 +1,13 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { CheckCircle, Copy, Check } from 'lucide-react'
 import { useCurrency } from '@/context/CurrencyContext'
 import { convertPrice } from '@/lib/currency'
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
   const params = useSearchParams()
   const router = useRouter()
   const { currency } = useCurrency()
@@ -95,5 +96,13 @@ export default function ConfirmationPage() {
 
       </div>
     </div>
+  )
+}
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><p className="text-gray-500">Loading...</p></div>}>
+      <ConfirmationContent />
+    </Suspense>
   )
 }
