@@ -1,9 +1,16 @@
 'use client'
+import Image from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCurrency } from '@/context/CurrencyContext'
 import { convertPrice } from '@/lib/currency'
 import type { HospitalWithDetails } from '@/lib/types'
+
+const hospitalImages: Record<string, string> = {
+  'a0000000-0000-0000-0000-000000000001': 'https://images.unsplash.com/photo-1632833239869-a37e3a5806d2?w=400&q=80',
+  'a0000000-0000-0000-0000-000000000002': 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=400&q=80',
+  'a0000000-0000-0000-0000-000000000003': 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&q=80',
+}
 
 export default function HospitalCard({ hospital }: { hospital: HospitalWithDetails }) {
   const router = useRouter()
@@ -52,7 +59,16 @@ export default function HospitalCard({ hospital }: { hospital: HospitalWithDetai
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-5 flex flex-col gap-3 border border-gray-100">
+    <div className="bg-white rounded-2xl shadow-md flex flex-col border border-gray-100 overflow-hidden">
+      <div className="relative h-48 w-full">
+        <Image
+          src={hospitalImages[hospital.id] || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&q=80'}
+          alt={hospital.name}
+          fill
+          className="object-cover"
+        />
+      </div>
+      <div className="p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
         <h2 className="text-lg font-bold text-gray-900">{hospital.name}</h2>
         <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full whitespace-nowrap">
@@ -111,6 +127,7 @@ export default function HospitalCard({ hospital }: { hospital: HospitalWithDetai
       >
         Book Now →
       </button>
+      </div>
     </div>
   )
 }
