@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CurrencyProvider } from "@/context/CurrencyContext";
+import { Toaster } from 'react-hot-toast'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +34,10 @@ export default function RootLayout({
         <meta name="theme-color" content="#0f4c81" />
       </head>
       <body className="min-h-full flex flex-col">
-        <CurrencyProvider>{children}</CurrencyProvider>
+        <CurrencyProvider>
+          <Toaster position="top-center" />
+          {children}
+        </CurrencyProvider>
       </body>
     </html>
   );

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useCurrency } from '@/context/CurrencyContext'
 import { convertPrice } from '@/lib/currency'
 import { ArrowLeft, Loader2, CheckCircle } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 interface BookingClientProps {
   hospitalId: string
@@ -54,10 +55,12 @@ export default function BookingClient({
       })
       const result = await res.json()
       if (!res.ok) throw new Error(result.error ?? 'Booking failed')
+      toast.success('Booking confirmed!')
       router.push(
         `/confirmation?bookingId=${result.booking_id}&balance=${result.new_wallet_balance}&hospitalName=${encodeURIComponent(hospitalName)}&doctorName=${encodeURIComponent(doctorName)}&roomType=${encodeURIComponent(roomType)}&price=${price}`
       )
     } catch (err: any) {
+      toast.error('Something went wrong. Please try again.')
       setError(err.message)
       setSubmitting(false)
     }

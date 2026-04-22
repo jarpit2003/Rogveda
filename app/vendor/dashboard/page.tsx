@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import type { VendorBooking } from '@/lib/types'
 import { supabase } from '@/lib/supabase'
+import toast from 'react-hot-toast'
 
 export default function VendorDashboardPage() {
   const router = useRouter()
@@ -57,11 +58,14 @@ export default function VendorDashboardPage() {
         body: JSON.stringify({ is_complete: true }),
       })
       if (res.ok) {
+        toast.success('Task marked complete!')
         setBookings(prev =>
           prev.map(b =>
             b.id === bookingId ? { ...b, task_complete: true, status: 'In Progress' } : b
           )
         )
+      } else {
+        toast.error('Failed to update. Please try again.')
       }
     } finally {
       setUpdating(prev => ({ ...prev, [taskId]: false }))
