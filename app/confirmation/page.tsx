@@ -13,6 +13,10 @@ function ConfirmationContent() {
   const { currency } = useCurrency()
   const [copied, setCopied] = useState(false)
 
+  function formatBookingId(id: string): string {
+    return 'RGV-' + id.slice(0, 8).toUpperCase()
+  }
+
   const bookingId = params.get('bookingId') ?? ''
   const balance = parseFloat(params.get('balance') ?? '0')
   const hospitalName = params.get('hospitalName') ?? ''
@@ -40,7 +44,7 @@ function ConfirmationContent() {
         <div className="flex items-center justify-between bg-gray-100 rounded-lg px-4 py-3">
           <div>
             <p className="text-xs text-gray-500">Booking ID</p>
-            <p className="font-mono font-semibold text-gray-800">{bookingId}</p>
+            <p className="font-mono font-semibold text-gray-800">{formatBookingId(bookingId)}</p>
           </div>
           <button onClick={copyBookingId} className="text-gray-500 hover:text-gray-800 transition">
             {copied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
