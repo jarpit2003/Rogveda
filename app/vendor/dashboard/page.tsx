@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import type { VendorBooking } from '@/lib/types'
+import { supabase } from '@/lib/supabase'
 
 export default function VendorDashboardPage() {
   const router = useRouter()
@@ -27,6 +28,25 @@ export default function VendorDashboardPage() {
   }
 
   useEffect(() => { fetchBookings() }, [])
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('bookings-changes')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'bookings' },
+        async () => {
+          const res = await fetch('/api/vendor/bookings')
+          const data = await res.json()
+          setBookings(data)
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   async function markComplete(taskId: string, bookingId: string) {
     setUpdating(prev => ({ ...prev, [taskId]: true }))
